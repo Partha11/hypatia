@@ -11,6 +11,37 @@ echo "Unzipping clean ns-3 (no overwrites)"
 unzip ${NS3_VERSION}.zip || exit 1
 cp -r ${NS3_VERSION}/* simulator/ || exit 1
 rm -r ${NS3_VERSION} || exit 1
+
+# Patch waf-tools files that break on Python >= 3.13 (pipes module removed).
+# These edits get clobbered each time ns-3 is unzipped above, so they must
+# be re-applied here.
+python3 - <<'PY' || exit 1
+import pathlib
+p = pathlib.Path("simulator/waf-tools/clang_compilation_database.py")
+s = p.read_text()
+import_old = "import sys, os, json, shlex, pipes\n"
+import_new = "import sys, os, json, shlex\n"
+quote_old = (
+    "if sys.hexversion >= 0x3030000:\n"
+    "\tquote = shlex.quote\n"
+    "else:\n"
+    "\tquote = pipes.quote\n"
+)
+quote_new = "quote = shlex.quote\n"
+changed = False
+if import_old in s:
+    s = s.replace(import_old, import_new)
+    changed = True
+if quote_old in s:
+    s = s.replace(quote_old, quote_new)
+    changed = True
+if changed:
+    p.write_text(s)
+    print(f"patched: {p}")
+else:
+    print(f"already patched or unexpected content: {p}")
+PY
+
 cd simulator || exit 1
 
 # Update the basic-sim module

@@ -80,6 +80,72 @@ BibTeX citation:
 5. The reproduction of the paper is essentially the tutorial for Hypatia.
    Please navigate to `paper/README.md`.
 
+### Build workarounds for modern Fedora / RHEL
+
+The steps above assume an Ubuntu-like environment. On a fresh Fedora / RHEL box (or any system with a recent toolchain), a few extra manual steps are required to get the framework to build cleanly. The following captures the full set of workarounds that were deployed together.
+
+#### 1. Install system and Python dependencies
+
+The system `pip` on Fedora is PEP 668-managed, so Python packages must be installed into the user site:
+
+```bash
+sudo dnf update -y
+sudo dnf install -y gcc gcc-c++ make cmake ninja-build git python3 python3-devel \
+    openmpi openmpi-devel gnuplot lcov patch proj-devel geos-devel environment-modules
+pip3 install --user numpy astropy ephem networkx sgp4 geopy matplotlib \
+    statsmodels cartopy
+```
+
+Fedora ships OpenMPI behind an environment module. Load it so that `mpic++` is on the path before `./waf` runs:
+
+```bash
+source /etc/profile.d/modules.sh
+module load mpi/openmpi-x86_64
+```
+
+*Tip: add those two lines to your `~/.bashrc` so they persist across terminal sessions.*
+
+#### 2. Fix git submodule cloning errors (`curl 92` / `early EOF`)
+
+Hypatia pulls the `basic-sim` module as a git submodule. Flaky connections can drop the HTTP/2 stream mid-clone. Force HTTP/1.1 and raise the POST buffer:
+
+```bash
+git config --global http.version HTTP/1.1
+git config --global http.postBuffer 524288000
+git submodule update --init --recursive
+```
+
+#### 3. Bypass C++20 strict syntax errors
+
+Modern GCC enforces C++20 strictly, which breaks the legacy ns-3 code in Hypatia with `template-id not allowed for constructor in C++20` (most visibly in `simulation-singleton.h`). Because ns-3 promotes warnings to errors (`-Werror`), the build halts.
+
+The cleanest bypass is to export compiler flags that force C++17 and disable `-Werror` before invoking the build script:
+
+```bash
+# 1. Clear any broken Waf cache first
+cd ns3-sat-sim/simulator
+rm -rf build/
+rm -f .lock-waf*
+cd ../../
+
+# 2. Export global GCC overrides
+export CXXFLAGS="-std=c++17 -Wno-error"
+
+# 3. Build the framework
+bash hypatia_build.sh
+```
+
+#### 4. Generate the Starlink network state
+
+After the build succeeds, pre-calculate the Starlink constellation state (via `satgenpy`) before running any packet-level simulation. To generate the Starlink-550 shell with the +Grid ISL topology (Scenario ID `6`):
+
+```bash
+cd paper/satellite_networks_state
+bash generate_for_paper.sh 6 4
+```
+
+Adjust the second argument to match your CPU thread count (e.g., `4` for a Core i3). The output is written to `satgenpy/gen_data/`, which the `ns3-sat-sim` pipeline then consumes.
+
 ### Visualizations
 Most of the visualizations in the paper are available [here](https://leosatsim.github.io/).
 All of the visualizations can be regenerated using scripts available in `satviz` as discussed above.
