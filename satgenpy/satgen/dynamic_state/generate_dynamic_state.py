@@ -47,7 +47,8 @@ def generate_dynamic_state(
                                   # "algorithm_free_one_only_gs_relays"
                                   # "algorithm_free_one_only_over_isls"
                                   # "algorithm_paired_many_only_over_isls"
-        enable_verbose_logs
+        enable_verbose_logs,
+        shortest_path_algorithm="floyd_warshall"
 ):
     if offset_ns % time_step_ns != 0:
         raise ValueError("Offset must be a multiple of time_step_ns")
@@ -73,7 +74,8 @@ def generate_dynamic_state(
             max_isl_length_m,
             dynamic_state_algorithm,
             prev_output,
-            enable_verbose_logs
+            enable_verbose_logs,
+            shortest_path_algorithm=shortest_path_algorithm
         )
 
 
@@ -89,7 +91,8 @@ def generate_dynamic_state_at(
         max_isl_length_m,
         dynamic_state_algorithm,
         prev_output,
-        enable_verbose_logs
+        enable_verbose_logs,
+        shortest_path_algorithm="floyd_warshall"
 ):
     if enable_verbose_logs:
         print("FORWARDING STATE AT T = " + (str(time_since_epoch_ns))
@@ -234,7 +237,8 @@ def generate_dynamic_state_at(
             sat_neighbor_to_if,
             list_gsl_interfaces_info,
             prev_output,
-            enable_verbose_logs
+            enable_verbose_logs,
+            shortest_path_algorithm=shortest_path_algorithm
         )
 
     elif dynamic_state_algorithm == "algorithm_free_gs_one_sat_many_only_over_isls":

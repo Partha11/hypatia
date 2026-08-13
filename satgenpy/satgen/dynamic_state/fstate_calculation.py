@@ -1,5 +1,43 @@
 import math
+import numpy as np
 import networkx as nx
+
+
+def dijkstra_all_pairs_distance_matrix(graph, weight="weight"):
+    """
+    All-pairs shortest-path distances computed by running single-source Dijkstra
+    from every node.
+
+    This helper is an alternative to ``nx.floyd_warshall_numpy`` and produces a
+    result with the same contract: a 2D numpy array of shape (N, N) where
+    ``dist[i, j]`` is the length of the shortest path from node ``i`` to node
+    ``j`` using the given edge ``weight`` attribute, ``0.0`` on the diagonal
+    and ``math.inf`` for unreachable pairs.
+
+    The forwarding-state selection logic accesses distances as
+    ``dist[(src, dst])`` (tuple indexing) and via
+    ``graph.edges[(u, v)]["weight"]`` for edge weights, so the same edge-weight
+    attribute and weight semantics as the existing Floyd-Warshall call are
+    preserved by accepting a ``weight`` argument that defaults to ``"weight"``.
+
+    Assumptions:
+      - Graph nodes are hashable and used as numpy array indices (the existing
+        callers pass integer satellite ids 0..num_satellites-1).
+      - The graph may be directed or undirected; Dijkstra follows edges in
+        their stored direction, matching Floyd-Warshall's behavior on the same
+        graph.
+    """
+    nodes = list(graph.nodes)
+    n = len(nodes)
+    dist = np.full((n, n), math.inf, dtype=float)
+    for i, src in enumerate(nodes):
+        distances_from_src = nx.single_source_dijkstra_path_length(
+            graph, src, weight=weight
+        )
+        for j, dst in enumerate(nodes):
+            if dst in distances_from_src:
+                dist[i, j] = distances_from_src[dst]
+    return dist
 
 
 def calculate_fstate_shortest_path_without_gs_relaying(
@@ -13,14 +51,26 @@ def calculate_fstate_shortest_path_without_gs_relaying(
         ground_station_satellites_in_range_candidates,
         sat_neighbor_to_if,
         prev_fstate,
-        enable_verbose_logs
+        enable_verbose_logs,
+        shortest_path_algorithm="floyd_warshall"
 ):
 
     # Calculate shortest path distances
-    if enable_verbose_logs:
-        print("  > Calculating Floyd-Warshall for graph without ground-station relays")
-    # (Note: Numpy has a deprecation warning here because of how networkx uses matrices)
-    dist_sat_net_without_gs = nx.floyd_warshall_numpy(sat_net_graph_only_satellites_with_isls)
+    if shortest_path_algorithm == "floyd_warshall":
+        if enable_verbose_logs:
+            print("  > Calculating Floyd-Warshall for graph without ground-station relays")
+        # (Note: Numpy has a deprecation warning here because of how networkx uses matrices)
+        dist_sat_net_without_gs = nx.floyd_warshall_numpy(sat_net_graph_only_satellites_with_isls)
+    elif shortest_path_algorithm == "dijkstra":
+        if enable_verbose_logs:
+            print("  > Calculating all-pairs Dijkstra for graph without ground-station relays")
+        dist_sat_net_without_gs = dijkstra_all_pairs_distance_matrix(
+            sat_net_graph_only_satellites_with_isls
+        )
+    else:
+        raise ValueError(
+            "Unsupported shortest_path_algorithm: %s" % shortest_path_algorithm
+        )
 
     # Forwarding state
     fstate = {}

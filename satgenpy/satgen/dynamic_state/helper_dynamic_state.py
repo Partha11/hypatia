@@ -27,7 +27,7 @@ from satgen.interfaces import *
 from .generate_dynamic_state import generate_dynamic_state
 import os
 import math
-from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing import Pool
 
 
 def worker(args):
@@ -39,15 +39,20 @@ def worker(args):
         simulation_end_time_ns,
         time_step_ns,
         offset_ns,
-        satellites,
         ground_stations,
         list_isls,
         list_gsl_interfaces_info,
         max_gsl_length_m,
         max_isl_length_m,
         dynamic_state_algorithm,
-        print_logs
+        print_logs,
+        shortest_path_algorithm
      ) = args
+
+    # Reconstruct EarthSatellite objects locally in this worker process
+    # (the TLE file lives in the parent directory of output_dynamic_state_dir)
+    tles_path = os.path.dirname(output_dynamic_state_dir) + "/tles.txt"
+    satellites = read_tles(tles_path)["satellites"]
 
     # Generate dynamic state
     generate_dynamic_state(
@@ -67,13 +72,15 @@ def worker(args):
                                   # "algorithm_free_one_only_over_isls"
                                   # "algorithm_free_gs_one_sat_many_only_over_isls"
                                   # "algorithm_paired_many_only_over_isls"
-        print_logs
+        print_logs,
+        shortest_path_algorithm=shortest_path_algorithm
     )
 
 
 def help_dynamic_state(
         output_generated_data_dir, num_threads, name, time_step_ms, duration_s,
-        max_gsl_length_m, max_isl_length_m, dynamic_state_algorithm, print_logs
+        max_gsl_length_m, max_isl_length_m, dynamic_state_algorithm, print_logs,
+        shortest_path_algorithm="floyd_warshall"
 ):
 
     # Directory
@@ -125,20 +132,20 @@ def help_dynamic_state(
             (current + num_time_steps) * time_step_ns + (time_step_ns if (i + 1) != num_threads else 0),
             time_step_ns,
             current * time_step_ns,
-            satellites,
             ground_stations,
             list_isls,
             list_gsl_interfaces_info,
             max_gsl_length_m,
             max_isl_length_m,
             dynamic_state_algorithm,
-            print_logs
+            print_logs,
+            shortest_path_algorithm
         ))
 
         current += num_time_steps
 
     # Run in parallel
-    pool = ThreadPool(num_threads)
+    pool = Pool(num_threads)
     pool.map(worker, list_args)
     pool.close()
     pool.join()

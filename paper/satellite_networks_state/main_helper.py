@@ -64,7 +64,8 @@ class MainHelper:
             isl_selection,            # isls_{none, plus_grid}
             gs_selection,             # ground_stations_{top_100, paris_moscow_grid}
             dynamic_state_algorithm,  # algorithm_{free_one_only_{gs_relays,_over_isls}, paired_many_only_over_isls}
-            num_threads
+            num_threads,
+            shortest_path_algorithm="floyd_warshall"
     ):
 
         # Add base name to setting
@@ -164,5 +165,6 @@ class MainHelper:
             self.MAX_GSL_LENGTH_M,
             self.MAX_ISL_LENGTH_M,
             dynamic_state_algorithm,
-            True
+            True,
+            shortest_path_algorithm=shortest_path_algorithm
         )
