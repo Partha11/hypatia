@@ -1,3 +1,6 @@
+dms2dec
+exputil
+
 astropy==8.0.1
 Cartopy==0.25.0
 ephem==4.2.1
@@ -6,7 +9,6 @@ matplotlib==3.11.1
 networkx==3.6.1
 numpy==2.5.1
 sgp4==2.27
-exputil==1.9.2
 statsmodels==0.14.6
 git+https://github.com/snkas/exputilpy.git@v1.6
 git+https://github.com/snkas/networkload.git@v1.3

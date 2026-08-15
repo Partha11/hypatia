@@ -35,7 +35,7 @@ for traffic_mode in ["specific", "general"]:
     for movement in ["static", "moving"]:
 
         # Prepare run directory
-        run_dir = "runs/run_" + traffic_mode + "_tm_pairing_kuiper_isls_" + movement
+        run_dir = "runs/run_" + traffic_mode + "_tm_pairing_starlink_isls_" + movement
         local_shell.remove_force_recursive(run_dir)
         local_shell.make_full_dir(run_dir)
 
@@ -73,8 +73,9 @@ for traffic_mode in ["specific", "general"]:
             satellite_conflicts_set = set()
             with open(
                 "../../satgenpy_analysis/data/"
-                "kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/100ms_for_200s/"
-                "manual/data/networkx_path_1174_to_1229.txt", "r"
+                "starlink_550_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/50ms_for_600s"
+                # "kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/100ms_for_200s/"
+                "manual/data/networkx_path_1584_to_1585.txt", "r"
             ) as f_in:
 
                 # Every reachable path, add to the set the source and destination
@@ -98,8 +99,8 @@ for traffic_mode in ["specific", "general"]:
                 # Resulting path filename
                 resulting_path_filename = (
                         "extra_satgenpy_analysis_data/"
-                        "kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/"
-                        "100ms_for_200s/manual/data/networkx_path_" + str(p[0]) + "_to_" + str(p[1]) + ".txt"
+                        "starlink_550_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/"
+                        "50ms_for_600s/manual/data/networkx_path_" + str(p[0]) + "_to_" + str(p[1]) + ".txt"
                 )
 
                 # Generate the path file if it does not exist yet (expensive)
@@ -108,8 +109,8 @@ for traffic_mode in ["specific", "general"]:
                         "cd ../../../satgenpy; python -m satgen.post_analysis.main_print_routes_and_rtt "
                         "../paper/ns3_experiments/traffic_matrix/extra_satgenpy_analysis_data "
                         "../paper/satellite_networks_state/gen_data/"
-                        "kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls "
-                        "100 200 " + str(p[0]) + " " + str(p[1])
+                        "starlink_550_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls "
+                        "50 600 " + str(p[0]) + " " + str(p[1])
                     )
 
                 # Open the path file
@@ -181,7 +182,7 @@ for traffic_mode in ["specific", "general"]:
 
         # Write the schedule
         networkload.write_schedule(
-            run_dir + "/schedule_kuiper_630.csv",
+            run_dir + "/schedule_starlink_550.csv",
             len(list_from_to),
             list_from_to,
             [1000000000000] * len(list_from_to),

@@ -227,11 +227,11 @@ def generate_sat_obj_list():
 
 LOCATION = (59.9311, 30.3609)  # Saint Petersburg
 
-VIZ_TIME = 170  # Total time of visualization in seconds
+VIZ_TIME = 600  # Total time of visualization in seconds
 VIZ_GRAN = 5  # Granularity of visualization in seconds
 
 generate_sat_obj_list()
-plt.ion()
+# plt.ion()
 cntr=1
 # for sec in range(3000, 3000 + 60*60, 10):
 for sec in range(0, VIZ_TIME, VIZ_GRAN):
@@ -251,11 +251,15 @@ for sec in range(0, VIZ_TIME, VIZ_GRAN):
     plt.axhspan(0.0, MIN_DEG_ELEVATION, facecolor='b', alpha=0.5)
 
     ax = plt.gca()
-    #sets the ratio to 5
     ax.set_aspect(3)
-    plt.show()
-    plt.pause(0.1)
-    #plt.savefig('OUTPUT_FOLDER/horizon_'+str(cntr)+'.png')
+
+    plt.savefig(
+        f'horizon_output/horizon_{cntr}.png',
+        dpi=150,
+        bbox_inches='tight'
+    )
+
+    plt.close()
     cntr += 1
 
 # If images are saved in an output folder (use plt.savefig above), run the below command (ffmpeg) to generate video.

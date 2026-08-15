@@ -83,14 +83,14 @@ bottomFile = "../static_html/bottom.html"
 city_detail_file = "../../paper/satellite_networks_state/input_data/ground_stations_cities_sorted_by_estimated_2025_pop_top_1000.basic.txt"
 
 # Time in ms for which visualization will be generated
-GEN_TIME=46800  #ms
+GEN_TIME=300000  #ms
 
 # Input file; Generated during simulation
 # Note the file_name consists of the 2 city IDs being offset by the size of the constellation
 # City IDs are available in the city_detail_file.
 # If city ID is X (for Paris X = 24) and constellation is Starlink_550 (1584 satellites),
 # then offset ID is 1584 + 24 = 1608.
-path_file = "/home/partha/Codes/Simulation/WMN/hypatia/paper/satgenpy_analysis/data/starlink_550_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/50ms_for_200s/manual/data/networkx_path_1584_to_1585.txt"
+path_file = "../../paper/satgenpy_analysis/data/starlink_550_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/50ms_for_600s/manual/data/networkx_path_1584_to_1585.txt"
 
 # Output directory for creating visualization html files
 OUT_DIR = "../viz_output/"
