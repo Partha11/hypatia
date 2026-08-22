@@ -51,7 +51,7 @@ full_satellite_network_isls = "starlink_550_isls_plus_grid_ground_stations_top_1
 #     ("kuiper_630_gs_relays", 1156, 1232, "TcpNewReno", full_satellite_network_gs_relay),
 # ]
 chosen_pairs = [
-    ("starlink_550_isls", 1584, 1585, "TcpNewReno", full_satellite_network_isls),
+    ("starlink_550_isls", 1594, 1647, "TcpNewReno", full_satellite_network_isls),
 ]
 
 
